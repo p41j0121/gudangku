@@ -207,6 +207,8 @@
             <th>Tujuan</th>
             <th>Nama Barang</th>
             <th>Jumlah</th>
+            <th>Keterangan</th>
+            <th>Penanggung Jawab</th>
           </tr>
         </thead>
         <tbody id="histori-body"></tbody>
@@ -230,7 +232,6 @@
   const GAS_LOGIN_URL = "https://script.google.com/macros/s/AKfycbynI7hCthhTu6bpZRigf608aSGLxRTwCR3DxxvmR206k3JaMVPOHxzgOiTlKDSkvNyg/exec";
   const GAS_STOK_URL = "https://script.google.com/macros/s/AKfycby-WuPfGj-MkdOxJhpcOJ4guhpALeOzIncDOWbTnR1pZkCOOp-f30iEjC_7fbwdJYNXjA/exec";
 
-  // SHA-256 hashing function
   async function sha256(text) {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
@@ -239,7 +240,6 @@
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // Fetch stok barang
   async function fetchStok() {
     try {
       const res = await fetch(`${GAS_STOK_URL}?action=lihatStok`);
@@ -252,7 +252,6 @@
     }
   }
 
-  // Render stok ke tabel
   function renderStok(data) {
     const tbody = document.getElementById("stok-body");
     tbody.innerHTML = "";
@@ -268,36 +267,30 @@
     });
   }
 
-  // CSV URL untuk histori
   const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaEi__b6VzzxO_QMlNT-gtzJx9oWZyeVejmdSeOHNve0L17zDR6MJqn7PUnwMl405gk-fF6mj8BY7w/pub?gid=485339731&single=true&output=csv";
 
-  // Fetch histori pakai PapaParse CSV
   function fetchHistori() {
     Papa.parse(csvUrl, {
       download: true,
       header: true,
       complete: function(results) {
-        console.log(results.data); // debug cek data
         let data = results.data;
-        // Filter baris kosong (jika ada)
         data = data.filter(row => Object.values(row).some(cell => cell && cell.trim() !== ""));
         renderHistori(data);
       },
       error: function(err) {
         console.error("Gagal load CSV histori:", err);
-        const tbody = document.getElementById("histori-body");
-        tbody.innerHTML = `<tr><td colspan="4">Gagal memuat data histori.</td></tr>`;
+        document.getElementById("histori-body").innerHTML = `<tr><td colspan="6">Gagal memuat data histori.</td></tr>`;
       }
     });
   }
 
-  // Render histori ke tabel sesuai header CSV kamu
   function renderHistori(data) {
     const tbody = document.getElementById("histori-body");
     tbody.innerHTML = "";
 
     if (data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4">Tidak ada data histori.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6">Tidak ada data histori.</td></tr>`;
       return;
     }
 
@@ -308,12 +301,13 @@
           <td>${item.tujuan || ''}</td>
           <td>${item["nama barang"] || ''}</td>
           <td>${item.jumlah || ''}</td>
+          <td>${item.keterangan || ''}</td>
+          <td>${item["penanggung_jawab"] || ''}</td>
         </tr>
       `;
     });
   }
 
-  // Toggle tampil section
   function showSection(section) {
     document.getElementById("barang-section").style.display = section === "barang" ? "block" : "none";
     document.getElementById("histori-section").style.display = section === "histori" ? "block" : "none";
@@ -322,7 +316,6 @@
     if (section === "histori") fetchHistori();
   }
 
-  // Modal login & logic
   const btnAdmin = document.getElementById("btnAdmin");
   const loginModal = document.getElementById("loginModal");
   const loginButton = document.getElementById("loginButton");
@@ -334,7 +327,6 @@
     loginModal.style.display = "flex";
     loginError.style.display = "none";
     loginError.innerText = "";
-    // Clear fields when modal open
     document.getElementById("username").value = "";
     document.getElementById("password").value = "";
     resetLoginButton();
@@ -371,7 +363,6 @@
     }
 
     loginError.style.display = "none";
-    loginError.innerText = "";
     setLoading(true);
 
     const passHash = await sha256(pass);
@@ -384,7 +375,7 @@
         localStorage.setItem("login", "true");
         loginModal.style.display = "none";
         setLoading(false);
-        window.location.href = "stok.html"; // Ganti sesuai halaman setelah login
+        window.location.href = "stok.html";
       } else {
         loginError.innerText = "Username atau password salah";
         loginError.style.display = "block";
@@ -398,7 +389,6 @@
     }
   });
 
-  // Filter pencarian barang realtime
   const searchInput = document.getElementById("search");
   searchInput.addEventListener("input", () => {
     const filter = searchInput.value.toLowerCase();
@@ -409,7 +399,6 @@
     });
   });
 
-  // Load awal tampilkan stok barang
   fetchStok();
 </script>
 
