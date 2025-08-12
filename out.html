@@ -6,69 +6,115 @@
   <title>Barang Keluar</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
       margin: 0;
       padding: 20px;
-      background: #f9f9f9;
+      background: #f0f4f8;
+      color: #2c3e50;
     }
+
     h2 {
       text-align: center;
       margin-bottom: 20px;
+      font-weight: 600;
     }
+
     form {
-      max-width: 500px;
+      max-width: 520px;
       margin: auto;
       background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
+
     label {
       display: block;
       margin-bottom: 6px;
-      font-weight: bold;
+      font-weight: 500;
     }
+
     input, select {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       margin-bottom: 15px;
       box-sizing: border-box;
+      border: 1px solid #dcdcdc;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fafafa;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #1abc9c;
+      box-shadow: 0 0 4px rgba(26, 188, 156, 0.3);
+    }
+
     button {
       width: 100%;
-      padding: 10px;
-      background: #2ecc71;
+      padding: 12px;
+      background: #1abc9c;
       border: none;
       color: white;
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 6px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.3s;
     }
-    button:hover {
-      background: #27ae60;
+
+    button:hover:not(:disabled) {
+      background: #16a085;
     }
+
+    button:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     #loading {
       text-align: center;
       margin-bottom: 10px;
       color: #3498db;
       display: none;
     }
+
     .btn-kembali {
       position: fixed;
       top: 20px;
       left: 20px;
-      background: #2980b9;
+      background: #3498db;
       color: white;
       padding: 8px 14px;
       border-radius: 6px;
       text-decoration: none;
-      font-weight: bold;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-weight: 500;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       transition: background 0.3s;
       z-index: 1000;
     }
+
     .btn-kembali:hover {
-      background: #1c5d8a;
+      background: #2980b9;
     }
   </style>
 </head>
@@ -102,12 +148,13 @@
     <label for="penanggungJawab">Penanggung Jawab</label>
     <input type="text" id="penanggungJawab" required>
 
-    <button type="submit">Keluarkan Barang</button>
+    <button type="submit" id="submitBtn">
+      <span>Keluarkan Barang</span>
+    </button>
   </form>
 
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycby-WuPfGj-MkdOxJhpcOJ4guhpALeOzIncDOWbTnR1pZkCOOp-f30iEjC_7fbwdJYNXjA/exec"; // GANTI dengan URL GAS kamu
-
     let stokBarang = [];
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -136,6 +183,9 @@
 
     document.getElementById("keluarForm").addEventListener("submit", async function (e) {
       e.preventDefault();
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Memproses...';
 
       const tanggal = document.getElementById("tanggal").value;
       const tujuan = document.getElementById("tujuan").value.trim();
@@ -147,12 +197,16 @@
 
       if (!penanggungJawab) {
         alert("❌ Harap isi kolom Penanggung Jawab");
+        btn.disabled = false;
+        btn.innerHTML = '<span>Keluarkan Barang</span>';
         return;
       }
 
       const stokItem = stokBarang.find(item => item.nama === namaBarang);
       if (!stokItem || jumlah > parseInt(stokItem.jumlah)) {
         alert("❌ Jumlah melebihi stok tersedia");
+        btn.disabled = false;
+        btn.innerHTML = '<span>Keluarkan Barang</span>';
         return;
       }
 
@@ -166,17 +220,17 @@
                   `&penanggung_jawab=${encodeURIComponent(penanggungJawab)}`;
 
       try {
-        document.getElementById("loading").style.display = "block";
         const res = await fetch(url);
         const result = await res.text();
         alert(result);
         document.getElementById("keluarForm").reset();
-        await loadNamaBarang(); // refresh stok
+        await loadNamaBarang();
       } catch (err) {
         alert("❌ Gagal mengirim data");
         console.error(err);
       } finally {
-        document.getElementById("loading").style.display = "none";
+        btn.disabled = false;
+        btn.innerHTML = '<span>Keluarkan Barang</span>';
       }
     });
   </script>
