@@ -1,162 +1,157 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Histori Barang Keluar</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
-      margin: 0;
-    }
-    /* Tombol kembali */
-    .back-button {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: #3498db;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-      z-index: 1000;
-      transition: background-color 0.3s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .back-button:hover {
-      background: #2980b9;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      margin-top: 50px; /* beri space bawah tombol */
-    }
-    #loading {
-      text-align: center;
-      margin-bottom: 10px;
-      color: #3498db;
-      display: none;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background: #2c3e50;
-      color: white;
-    }
-    .edit-btn, .save-btn {
-      cursor: pointer;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 4px;
-      color: white;
-    }
-    .edit-btn { background: #3498db; }
-    .save-btn { background: #2ecc71; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Histori Barang Keluar</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; padding: 20px; margin: 0; color:#333 }
+  .back-button {
+    position: fixed; top:15px; left:15px; background:#3498db; color:#fff; padding:8px 14px; border-radius:6px;
+    text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,0.12); display:inline-flex; gap:8px; align-items:center;
+  }
+  h2 { text-align:center; margin-top:60px; margin-bottom:18px; color:#2c3e50; font-weight:600 }
+  #loading { text-align:center; margin-bottom:12px; color:#3498db; display:none; font-weight:600 }
+  table { width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.06) }
+  th, td { padding:12px 14px; border-bottom:1px solid #eef2f6; font-size:14px; text-align:left }
+  th { background:#3498db; color:#fff; font-weight:600 }
+  tr:hover td { background:#f8fbff }
+  .edit-btn, .save-btn { padding:6px 12px; border-radius:6px; color:#fff; border:none; cursor:pointer; font-weight:600 }
+  .edit-btn { background:#2b85c7 } .edit-btn:hover { background:#246fae }
+  .save-btn { background:#27ae60 } .save-btn:hover { background:#219150 }
+  .spinner { border:2px solid rgba(255,255,255,0.35); border-top-color:#fff; border-radius:50%; width:14px; height:14px; animation:spin .7s linear infinite; display:inline-block; vertical-align:middle; margin-right:6px }
+  @keyframes spin { to { transform:rotate(360deg) } }
+</style>
 </head>
 <body>
 
-  <a href="stok.html" class="back-button">⬅ Kembali ke Stok Gudang</a>
+<a href="stok.html" class="back-button">⬅ Kembali</a>
+<h2>Histori Barang Keluar</h2>
+<div id="loading">⏳ Memuat data...</div>
 
-  <h2>Histori Barang Keluar</h2>
-  <div id="loading">⏳ Memuat data...</div>
+<table>
+  <thead>
+    <tr>
+      <th>Tanggal</th>
+      <th>Tujuan</th>
+      <th>Nama Barang</th>
+      <th>Jumlah</th>
+      <th>ID Kendaraan</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody id="histori-body"></tbody>
+</table>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Tanggal</th>
-        <th>Tujuan</th>
-        <th>Nama Barang</th>
-        <th>Jumlah</th>
-        <th>ID Kendaraan</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody id="histori-body"></tbody>
-  </table>
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycby-WuPfGj-MkdOxJhpcOJ4guhpALeOzIncDOWbTnR1pZkCOOp-f30iEjC_7fbwdJYNXjA/exec";
 
-  <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycby-WuPfGj-MkdOxJhpcOJ4guhpALeOzIncDOWbTnR1pZkCOOp-f30iEjC_7fbwdJYNXjA/exec";
+/**
+ * Ambil hanya tanggal (YYYY-MM-DD).
+ * - Mencari pola YYYY-MM-DD
+ * - Jika input DD/MM/YYYY -> konversi jadi YYYY-MM-DD
+ * - Jika ada 'T' (ISO) -> ambil sebelum 'T'
+ * - Fallback: ambil token sebelum spasi
+ */
+function pad(n){ return String(n).padStart(2,'0'); }
+function formatDateOnly(v){
+  if(!v && v !== 0) return '';
+  let s = String(v).trim();
+  // cari YYYY-MM-DD
+  let m = s.match(/\d{4}-\d{2}-\d{2}/);
+  if(m) return m[0];
+  // cari DD/MM/YYYY atau D/M/YYYY
+  m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m) {
+    const d = pad(m[1]), mo = pad(m[2]), y = m[3];
+    return `${y}-${mo}-${d}`;
+  }
+  // iso dengan T
+  if(s.includes('T')) return s.split('T')[0];
+  // token sebelum spasi
+  if(s.includes(' ')) return s.split(' ')[0];
+  // fallback: kembalikan apa adanya
+  return s;
+}
 
-    document.addEventListener("DOMContentLoaded", loadHistori);
+document.addEventListener("DOMContentLoaded", loadHistori);
 
-    async function loadHistori() {
-      const loading = document.getElementById("loading");
-      loading.style.display = "block";
-      try {
-        const res = await fetch(`${GAS_URL}?action=lihatBarangKeluar`);
-        const data = await res.json();
-        const tbody = document.getElementById("histori-body");
-        tbody.innerHTML = '';
-        data.forEach((row, index) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td data-field="tanggal">${row.tanggal}</td>
-            <td data-field="tujuan">${row.tujuan}</td>
-            <td data-field="nama">${row.nama}</td>
-            <td data-field="jumlah">${row.jumlah}</td>
-            <td data-field="id_kendaraan">${row.id_kendaraan}</td>
-            <td>
-              <button class="edit-btn" onclick="enableEdit(this, ${index})">Edit</button>
-              <button class="save-btn" style="display:none;" onclick="saveEdit(this, ${index})">Simpan</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        alert("❌ Gagal memuat histori.");
-        console.error(err);
-      } finally {
-        loading.style.display = "none";
-      }
-    }
+async function loadHistori(){
+  const loading = document.getElementById('loading');
+  loading.style.display = 'block';
+  try{
+    const res = await fetch(`${GAS_URL}?action=lihatBarangKeluar`);
+    const data = await res.json();
+    const tbody = document.getElementById('histori-body');
+    tbody.innerHTML = '';
+    // debug: kalau mau lihat format tanggal asli => console.log(data.map(r=>r.tanggal));
+    data.forEach((row, index) => {
+      const dateOnly = formatDateOnly(row.tanggal || row.tanggal_raw || '');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td data-field="tanggal">${dateOnly}</td>
+        <td data-field="tujuan">${row.tujuan || ''}</td>
+        <td data-field="nama">${row.nama || ''}</td>
+        <td data-field="jumlah">${row.jumlah || ''}</td>
+        <td data-field="id_kendaraan">${row.id_kendaraan || ''}</td>
+        <td>
+          <button class="edit-btn" onclick="enableEdit(this, ${index})">Edit</button>
+          <button class="save-btn" style="display:none;" onclick="saveEdit(this, ${index})">Simpan</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }catch(err){
+    console.error(err);
+    alert('❌ Gagal memuat histori. Cek console untuk detail.');
+  }finally{
+    loading.style.display = 'none';
+  }
+}
 
-    function enableEdit(btn, index) {
-      const row = btn.closest("tr");
-      row.querySelectorAll("td[data-field]").forEach(td => td.contentEditable = true);
-      btn.style.display = "none";
-      row.querySelector(".save-btn").style.display = "inline-block";
-    }
+function enableEdit(btn, index){
+  const row = btn.closest('tr');
+  row.querySelectorAll('td[data-field]').forEach(td => td.contentEditable = true);
+  btn.style.display = 'none';
+  row.querySelector('.save-btn').style.display = 'inline-block';
+}
 
-    async function saveEdit(btn, index) {
-      const row = btn.closest("tr");
-      const tanggal = row.querySelector("td[data-field='tanggal']").innerText.trim();
-      const tujuan = row.querySelector("td[data-field='tujuan']").innerText.trim();
-      const nama = row.querySelector("td[data-field='nama']").innerText.trim();
-      const jumlah = row.querySelector("td[data-field='jumlah']").innerText.trim();
-      const id_kendaraan = row.querySelector("td[data-field='id_kendaraan']").innerText.trim();
+async function saveEdit(btn, index){
+  const row = btn.closest('tr');
+  // ambil teks, lalu hanya kirim bagian tanggal (YYYY-MM-DD) lewat formatDateOnly
+  const tanggalRaw = row.querySelector("td[data-field='tanggal']").innerText.trim();
+  const tanggal = formatDateOnly(tanggalRaw);
+  const tujuan = row.querySelector("td[data-field='tujuan']").innerText.trim();
+  const nama = row.querySelector("td[data-field='nama']").innerText.trim();
+  const jumlah = row.querySelector("td[data-field='jumlah']").innerText.trim();
+  const id_kendaraan = row.querySelector("td[data-field='id_kendaraan']").innerText.trim();
 
-      try {
-        const res = await fetch(`${GAS_URL}?action=editBarangKeluar&index=${index}&tanggal=${encodeURIComponent(tanggal)}&tujuan=${encodeURIComponent(tujuan)}&nama=${encodeURIComponent(nama)}&jumlah=${encodeURIComponent(jumlah)}&id_kendaraan=${encodeURIComponent(id_kendaraan)}`);
-        const result = await res.text();
-        alert(result);
-        loadHistori();
-      } catch (err) {
-        alert("❌ Gagal menyimpan perubahan.");
-        console.error(err);
-      }
-    }
-  </script>
+  // tampilkan loading di tombol
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Menyimpan...';
+  btn.disabled = true;
+
+  try{
+    const url = `${GAS_URL}?action=editBarangKeluar&index=${index}`
+                + `&tanggal=${encodeURIComponent(tanggal)}`
+                + `&tujuan=${encodeURIComponent(tujuan)}`
+                + `&nama=${encodeURIComponent(nama)}`
+                + `&jumlah=${encodeURIComponent(jumlah)}`
+                + `&id_kendaraan=${encodeURIComponent(id_kendaraan)}`;
+    const res = await fetch(url);
+    const text = await res.text();
+    alert(text);
+    // reload data supaya konsisten
+    await loadHistori();
+  }catch(err){
+    console.error(err);
+    alert('❌ Gagal menyimpan perubahan. Cek console.');
+  }finally{
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
+}
+</script>
 
 </body>
 </html>
-
-
