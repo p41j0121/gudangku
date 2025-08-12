@@ -145,15 +145,15 @@
   }
 
   /* Popup Registrasi */
-  #registerModal {
-    display: none;
+#registerModal {
+    display: flex;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.4);
     justify-content: center;
     align-items: center;
     z-index: 999;
-  }
+}
   #registerModal.hidden {
     display: none !important;
   }
@@ -316,15 +316,24 @@ async function registerUser() {
   const user = document.getElementById("regUsername").value.trim();
   const pass = document.getElementById("regPassword").value.trim();
   const errorEl = document.getElementById("registerError");
+  const btn = document.getElementById("registerButton");
+
   if (!user || !pass) {
     errorEl.innerText = "Harap isi semua kolom";
     errorEl.style.display = "block";
     return;
   }
+
   const passHash = await sha256(pass);
+
+  // Ganti teks tombol jadi loading
+  btn.disabled = true;
+  btn.innerHTML = "⏳ Mendaftarkan...";
+
   try {
     const res = await fetch(`${GAS_URL_AUTH}?action=register&username=${encodeURIComponent(user)}&password=${passHash}`);
     const text = await res.text();
+
     if (text.toLowerCase().includes("berhasil")) {
       alert("✅ Akun berhasil didaftarkan!");
       closeRegister();
@@ -336,7 +345,12 @@ async function registerUser() {
     errorEl.innerText = "Terjadi kesalahan saat registrasi";
     errorEl.style.display = "block";
   }
+
+  // Balikin tombol ke normal
+  btn.disabled = false;
+  btn.innerHTML = "Daftar";
 }
+
 
 function openRegister() {
   document.getElementById("registerModal").classList.remove("hidden");
