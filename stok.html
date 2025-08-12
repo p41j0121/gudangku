@@ -326,7 +326,6 @@ async function registerUser() {
 
   const passHash = await sha256(pass);
 
-  // Ganti teks tombol jadi loading
   btn.disabled = true;
   btn.innerHTML = "⏳ Mendaftarkan...";
 
@@ -346,11 +345,9 @@ async function registerUser() {
     errorEl.style.display = "block";
   }
 
-  // Balikin tombol ke normal
   btn.disabled = false;
   btn.innerHTML = "Daftar";
 }
-
 
 function openRegister() {
   document.getElementById("registerModal").classList.remove("hidden");
@@ -405,6 +402,8 @@ async function loadStok() {
       `;
       tbody.appendChild(row);
     });
+    // Setelah load data, panggil filter supaya search langsung terapkan (jika ada isi di search box)
+    filterTable();
   } catch (err) {
     console.error("Gagal load stok:", err);
   }
@@ -456,6 +455,35 @@ async function tambahKategoriPrompt() {
   }
 }
 
+// Fungsi filter untuk search box aktif
+function filterTable() {
+  const filter = document.getElementById("cariBarang").value.toLowerCase();
+  const tbody = document.querySelector("#stokTable tbody");
+  const rows = tbody.getElementsByTagName("tr");
+  
+  for (let row of rows) {
+    // Kadang kategori ada span atau select (waktu edit)
+    const kategoriCell = row.querySelector('td[data-field="kategori"]');
+    let kategoriText = "";
+    if (!kategoriCell) continue;
+    if (kategoriCell.querySelector("select")) {
+      kategoriText = kategoriCell.querySelector("select").value.toLowerCase();
+    } else if (kategoriCell.querySelector("span")) {
+      kategoriText = kategoriCell.querySelector("span").textContent.toLowerCase();
+    } else {
+      kategoriText = kategoriCell.textContent.toLowerCase();
+    }
+
+    const nama = row.querySelector('td[data-field="nama"]').textContent.toLowerCase();
+
+    if (nama.includes(filter) || kategoriText.includes(filter)) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadKategori();
   document.getElementById("registerButton").addEventListener("click", registerUser);
@@ -489,6 +517,9 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.innerHTML = originalText;
     }
   });
+
+  // Pas search input di Edit Stok, panggil filterTable
+  document.getElementById("cariBarang").addEventListener("input", filterTable);
 });
 </script>
 </body>
