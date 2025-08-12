@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stok Gudang</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: #f4f4f4;
+    }
+    .sidebar {
+      width: 200px;
+      background: #2c3e50;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 10px;
+    }
+    .sidebar h2 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .menu a {
+      display: block;
+      padding: 10px;
+      color: white;
+      text-decoration: none;
+      margin-bottom: 10px;
+      background: #34495e;
+      border-radius: 4px;
+      text-align: center;
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+    .menu a:hover {
+      background: #1abc9c;
+    }
+    .content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    h2 {
+      margin-bottom: 15px;
+      color: #ff0000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px 12px;
+      text-align: left;
+    }
+    th {
+      background: #1abc9c;
+      color: white;
+    }
+    #search {
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    /* Modal login */
+    #loginModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #loginModal .modal-content {
+      background: white;
+      padding: 20px 20px 30px;
+      border-radius: 8px;
+      width: 320px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    #loginModal input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    #loginModal button {
+      padding: 12px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 4px;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    #loginModal button:hover:not(:disabled) {
+      background: #1abc9c;
+    }
+    #loginError {
+      color: red;
+      display: none;
+      margin-top: 10px;
+      font-weight: 600;
+      text-align: center;
+    }
+    /* Tombol close X */
+    #loginModal .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+      user-select: none;
+      background: transparent;
+      border: none;
+      line-height: 1;
+    }
+    /* Loading spinner */
+    @keyframes spinner {
+      to {transform: rotate(360deg);}
+    }
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      animation: spinner 0.6s linear infinite;
+    }
+  </style>
+
+  <!-- PapaParse CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div>
+      <h2>Gudang</h2>
+      <div class="menu">
+        <a href="#" onclick="showSection('barang')">Stok Barang</a>
+        <a href="out.html">Barang Keluar</a>
+        <a href="#" onclick="showSection('histori')">Histori</a>
+      </div>
+    </div>
+    <a href="#" id="btnAdmin" style="display: block; padding: 10px; background: #e67e22; color: white; text-align: center; border-radius: 5px; text-decoration: none;">
+      Area Admin
+    </a>
+  </div>
+
+  <div class="content">
+    <!-- Daftar Barang -->
+    <div id="barang-section">
+      <h2>Daftar Barang</h2>
+      <input type="text" id="search" placeholder="Cari barang..." />
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Jumlah</th>
+            <th>Kategori</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody id="stok-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Riwayat Stok -->
+    <div id="histori-section" style="display:none;">
+      <h2>Riwayat Stok</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Tujuan</th>
+            <th>Nama Barang</th>
+            <th>Jumlah</th>
+          </tr>
+        </thead>
+        <tbody id="histori-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Login -->
+  <div id="loginModal">
+    <div class="modal-content">
+      <button class="close-btn" title="Tutup">&times;</button>
+      <h3 style="text-align:center;margin-bottom:15px;">Login Admin</h3>
+      <input type="text" id="username" placeholder="Username" autocomplete="username" />
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+      <button id="loginButton">Login</button>
+      <p id="loginError"></p>
+    </div>
+  </div>
+
+<script>
+  const GAS_LOGIN_URL = "https://script.google.com/macros/s/AKfycbynI7hCthhTu6bpZRigf608aSGLxRTwCR3DxxvmR206k3JaMVPOHxzgOiTlKDSkvNyg/exec";
+  const GAS_STOK_URL = "https://script.google.com/macros/s/AKfycby-WuPfGj-MkdOxJhpcOJ4guhpALeOzIncDOWbTnR1pZkCOOp-f30iEjC_7fbwdJYNXjA/exec";
+
+  // SHA-256 hashing function
+  async function sha256(text) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Fetch stok barang
+  async function fetchStok() {
+    try {
+      const res = await fetch(`${GAS_STOK_URL}?action=lihatStok`);
+      if (!res.ok) throw new Error("Gagal fetch stok");
+      const data = await res.json();
+      renderStok(data);
+    } catch (error) {
+      console.error(error);
+      alert("Gagal mengambil data stok. Cek koneksi dan URL.");
+    }
+  }
+
+  // Render stok ke tabel
+  function renderStok(data) {
+    const tbody = document.getElementById("stok-body");
+    tbody.innerHTML = "";
+    data.forEach(item => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${item.nama}</td>
+          <td>${item.jumlah}</td>
+          <td>${item.kategori}</td>
+          <td>${item.keterangan}</td>
+        </tr>
+      `;
+    });
+  }
+
+  // CSV URL untuk histori
+  const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTaEi__b6VzzxO_QMlNT-gtzJx9oWZyeVejmdSeOHNve0L17zDR6MJqn7PUnwMl405gk-fF6mj8BY7w/pub?gid=485339731&single=true&output=csv";
+
+  // Fetch histori pakai PapaParse CSV
+  function fetchHistori() {
+    Papa.parse(csvUrl, {
+      download: true,
+      header: true,
+      complete: function(results) {
+        console.log(results.data); // debug cek data
+        let data = results.data;
+        // Filter baris kosong (jika ada)
+        data = data.filter(row => Object.values(row).some(cell => cell && cell.trim() !== ""));
+        renderHistori(data);
+      },
+      error: function(err) {
+        console.error("Gagal load CSV histori:", err);
+        const tbody = document.getElementById("histori-body");
+        tbody.innerHTML = `<tr><td colspan="4">Gagal memuat data histori.</td></tr>`;
+      }
+    });
+  }
+
+  // Render histori ke tabel sesuai header CSV kamu
+  function renderHistori(data) {
+    const tbody = document.getElementById("histori-body");
+    tbody.innerHTML = "";
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4">Tidak ada data histori.</td></tr>`;
+      return;
+    }
+
+    data.forEach(item => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${item.tanggal || ''}</td>
+          <td>${item.tujuan || ''}</td>
+          <td>${item["nama barang"] || ''}</td>
+          <td>${item.jumlah || ''}</td>
+        </tr>
+      `;
+    });
+  }
+
+  // Toggle tampil section
+  function showSection(section) {
+    document.getElementById("barang-section").style.display = section === "barang" ? "block" : "none";
+    document.getElementById("histori-section").style.display = section === "histori" ? "block" : "none";
+
+    if (section === "barang") fetchStok();
+    if (section === "histori") fetchHistori();
+  }
+
+  // Modal login & logic
+  const btnAdmin = document.getElementById("btnAdmin");
+  const loginModal = document.getElementById("loginModal");
+  const loginButton = document.getElementById("loginButton");
+  const loginError = document.getElementById("loginError");
+  const closeBtn = loginModal.querySelector(".close-btn");
+
+  btnAdmin.addEventListener("click", e => {
+    e.preventDefault();
+    loginModal.style.display = "flex";
+    loginError.style.display = "none";
+    loginError.innerText = "";
+    // Clear fields when modal open
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    resetLoginButton();
+  });
+
+  closeBtn.addEventListener("click", () => {
+    loginModal.style.display = "none";
+    resetLoginButton();
+  });
+
+  function setLoading(isLoading) {
+    if (isLoading) {
+      loginButton.disabled = true;
+      loginButton.innerHTML = `<div class="spinner"></div> Loading...`;
+    } else {
+      loginButton.disabled = false;
+      loginButton.innerText = "Login";
+    }
+  }
+
+  function resetLoginButton() {
+    loginButton.disabled = false;
+    loginButton.innerText = "Login";
+  }
+
+  loginButton.addEventListener("click", async () => {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
+
+    if (!user || !pass) {
+      loginError.innerText = "Harap isi semua kolom";
+      loginError.style.display = "block";
+      return;
+    }
+
+    loginError.style.display = "none";
+    loginError.innerText = "";
+    setLoading(true);
+
+    const passHash = await sha256(pass);
+
+    try {
+      const res = await fetch(`${GAS_LOGIN_URL}?action=login&username=${encodeURIComponent(user)}&password=${passHash}`);
+      const text = await res.text();
+
+      if (text === "OK") {
+        localStorage.setItem("login", "true");
+        loginModal.style.display = "none";
+        setLoading(false);
+        window.location.href = "stok.html"; // Ganti sesuai halaman setelah login
+      } else {
+        loginError.innerText = "Username atau password salah";
+        loginError.style.display = "block";
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      loginError.innerText = "Terjadi kesalahan saat login";
+      loginError.style.display = "block";
+      setLoading(false);
+    }
+  });
+
+  // Filter pencarian barang realtime
+  const searchInput = document.getElementById("search");
+  searchInput.addEventListener("input", () => {
+    const filter = searchInput.value.toLowerCase();
+    const rows = document.querySelectorAll("#stok-body tr");
+    rows.forEach(row => {
+      const nama = row.cells[0].textContent.toLowerCase();
+      row.style.display = nama.includes(filter) ? "" : "none";
+    });
+  });
+
+  // Load awal tampilkan stok barang
+  fetchStok();
+</script>
+
+</body>
+</html>

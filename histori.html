@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Histori Barang Keluar</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      margin: 0;
+    }
+    /* Tombol kembali */
+    .back-button {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      z-index: 1000;
+      transition: background-color 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-button:hover {
+      background: #2980b9;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      margin-top: 50px; /* beri space bawah tombol */
+    }
+    #loading {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #3498db;
+      display: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #2c3e50;
+      color: white;
+    }
+    .edit-btn, .save-btn {
+      cursor: pointer;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      color: white;
+    }
+    .edit-btn { background: #3498db; }
+    .save-btn { background: #2ecc71; }
+  </style>
+</head>
+<body>
+
+  <a href="stok.html" class="back-button">⬅ Kembali ke Stok Gudang</a>
+
+  <h2>Histori Barang Keluar</h2>
+  <div id="loading">⏳ Memuat data...</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Tanggal</th>
+        <th>Tujuan</th>
+        <th>Nama Barang</th>
+        <th>Jumlah</th>
+        <th>ID Kendaraan</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="histori-body"></tbody>
+  </table>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycby-WuPfGj-MkdOxJhpcOJ4guhpALeOzIncDOWbTnR1pZkCOOp-f30iEjC_7fbwdJYNXjA/exec";
+
+    document.addEventListener("DOMContentLoaded", loadHistori);
+
+    async function loadHistori() {
+      const loading = document.getElementById("loading");
+      loading.style.display = "block";
+      try {
+        const res = await fetch(`${GAS_URL}?action=lihatBarangKeluar`);
+        const data = await res.json();
+        const tbody = document.getElementById("histori-body");
+        tbody.innerHTML = '';
+        data.forEach((row, index) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td data-field="tanggal">${row.tanggal}</td>
+            <td data-field="tujuan">${row.tujuan}</td>
+            <td data-field="nama">${row.nama}</td>
+            <td data-field="jumlah">${row.jumlah}</td>
+            <td data-field="idKendaraan">${row.idKendaraan}</td>
+            <td>
+              <button class="edit-btn" onclick="enableEdit(this, ${index})">Edit</button>
+              <button class="save-btn" style="display:none;" onclick="saveEdit(this, ${index})">Simpan</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        alert("❌ Gagal memuat histori.");
+        console.error(err);
+      } finally {
+        loading.style.display = "none";
+      }
+    }
+
+    function enableEdit(btn, index) {
+      const row = btn.closest("tr");
+      row.querySelectorAll("td[data-field]").forEach(td => td.contentEditable = true);
+      btn.style.display = "none";
+      row.querySelector(".save-btn").style.display = "inline-block";
+    }
+
+    async function saveEdit(btn, index) {
+      const row = btn.closest("tr");
+      const tanggal = row.querySelector("td[data-field='tanggal']").innerText.trim();
+      const tujuan = row.querySelector("td[data-field='tujuan']").innerText.trim();
+      const nama = row.querySelector("td[data-field='nama']").innerText.trim();
+      const jumlah = row.querySelector("td[data-field='jumlah']").innerText.trim();
+      const idKendaraan = row.querySelector("td[data-field='idKendaraan']").innerText.trim();
+
+      try {
+        const res = await fetch(`${GAS_URL}?action=editBarangKeluar&index=${index}&tanggal=${encodeURIComponent(tanggal)}&tujuan=${encodeURIComponent(tujuan)}&nama=${encodeURIComponent(nama)}&jumlah=${encodeURIComponent(jumlah)}&idKendaraan=${encodeURIComponent(idKendaraan)}`);
+        const result = await res.text();
+        alert(result);
+        loadHistori();
+      } catch (err) {
+        alert("❌ Gagal menyimpan perubahan.");
+        console.error(err);
+      }
+    }
+  </script>
+
+</body>
+</html>

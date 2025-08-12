@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Barang Keluar</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    form {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #2ecc71;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #27ae60;
+    }
+    #loading {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #3498db;
+      display: none;
+    }
+    .btn-kembali {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #2980b9;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background 0.3s;
+      z-index: 1000;
+    }
+    .btn-kembali:hover {
+      background: #1c5d8a;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="btn-kembali">← Kembali ke Gudang</a>
+
+  <h2>Barang Keluar</h2>
+
+  <div id="loading">⏳ Memproses...</div>
+
+  <form id="keluarForm">
+    <label for="tanggal">Tanggal</label>
+    <input type="date" id="tanggal" required>
+
+    <label for="tujuan">Tujuan</label>
+    <input type="text" id="tujuan" required>
+
+    <label for="namaBarang">Nama Barang</label>
+    <select id="namaBarang" required></select>
+
+    <label for="jumlah">Jumlah</label>
+    <input type="number" id="jumlah" min="1" required>
+
+    <label for="idKendaraan">ID Kendaraan</label>
+    <input type="text" id="idKendaraan" required>
+
+    <label for="keterangan">Keterangan</label>
+    <input type="text" id="keterangan">
+
+    <label for="penanggungJawab">Penanggung Jawab</label>
+    <input type="text" id="penanggungJawab" required>
+
+    <button type="submit">Keluarkan Barang</button>
+  </form>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycby-WuPfGj-MkdOxJhpcOJ4guhpALeOzIncDOWbTnR1pZkCOOp-f30iEjC_7fbwdJYNXjA/exec"; // GANTI dengan URL GAS kamu
+
+    let stokBarang = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      document.getElementById("loading").style.display = "block";
+      await loadNamaBarang();
+      document.getElementById("loading").style.display = "none";
+    });
+
+    async function loadNamaBarang() {
+      try {
+        const res = await fetch(`${GAS_URL}?action=lihatStok`);
+        stokBarang = await res.json();
+        const select = document.getElementById("namaBarang");
+        select.innerHTML = "<option value=''>-- Pilih Barang --</option>";
+        stokBarang.forEach(item => {
+          const option = document.createElement("option");
+          option.value = item.nama;
+          option.textContent = `${item.nama} (Stok: ${item.jumlah})`;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        alert("❌ Gagal memuat data stok");
+        console.error(err);
+      }
+    }
+
+    document.getElementById("keluarForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const tanggal = document.getElementById("tanggal").value;
+      const tujuan = document.getElementById("tujuan").value.trim();
+      const namaBarang = document.getElementById("namaBarang").value;
+      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const idKendaraan = document.getElementById("idKendaraan").value.trim();
+      const keterangan = document.getElementById("keterangan").value.trim();
+      const penanggungJawab = document.getElementById("penanggungJawab").value.trim();
+
+      if (!penanggungJawab) {
+        alert("❌ Harap isi kolom Penanggung Jawab");
+        return;
+      }
+
+      const stokItem = stokBarang.find(item => item.nama === namaBarang);
+      if (!stokItem || jumlah > parseInt(stokItem.jumlah)) {
+        alert("❌ Jumlah melebihi stok tersedia");
+        return;
+      }
+
+      const url = `${GAS_URL}?action=barangKeluar` +
+                  `&nama=${encodeURIComponent(namaBarang)}` +
+                  `&jumlah=${jumlah}` +
+                  `&tanggal=${tanggal}` +
+                  `&tujuan=${encodeURIComponent(tujuan)}` +
+                  `&id_kendaraan=${encodeURIComponent(idKendaraan)}` +
+                  `&keterangan=${encodeURIComponent(keterangan)}` +
+                  `&penanggung_jawab=${encodeURIComponent(penanggungJawab)}`;
+
+      try {
+        document.getElementById("loading").style.display = "block";
+        const res = await fetch(url);
+        const result = await res.text();
+        alert(result);
+        document.getElementById("keluarForm").reset();
+        await loadNamaBarang(); // refresh stok
+      } catch (err) {
+        alert("❌ Gagal mengirim data");
+        console.error(err);
+      } finally {
+        document.getElementById("loading").style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
