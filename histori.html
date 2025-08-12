@@ -21,129 +21,51 @@
       padding:24px;
       color:#1f2937;
     }
-
-    /* container */
-    .container{
-      max-width:1100px;
-      margin:0 auto;
-    }
-
+    .container{ max-width:1100px; margin:0 auto; }
     .back-button{
-      position:fixed;
-      top:18px;
-      left:18px;
-      background:var(--accent);
-      color:#fff;
-      border:none;
-      padding:8px 12px;
-      border-radius:8px;
-      text-decoration:none;
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      box-shadow:0 6px 18px rgba(24,90,219,0.12);
+      position:fixed; top:18px; left:18px; background:var(--accent); color:#fff;
+      border:none; padding:8px 12px; border-radius:8px; text-decoration:none;
+      display:inline-flex; gap:8px; align-items:center; box-shadow:0 6px 18px rgba(24,90,219,0.12);
     }
-    .back-button:hover{filter:brightness(.95)}
-
-    header h1{
-      margin:64px 0 8px;
-      font-size:20px;
-      letter-spacing:.2px;
-    }
-    header p{ margin:0 0 18px; color:var(--muted); font-size:14px }
-
+    header h1{ margin:64px 0 8px; font-size:20px; letter-spacing:.2px; }
+    header p{ margin:0 0 18px; color:var(--muted); font-size:14px; }
     .card{
-      background:var(--card);
-      border-radius:12px;
-      box-shadow:0 6px 24px rgba(31,41,55,0.06);
-      padding:18px;
-      overflow:auto;
+      background:var(--card); border-radius:12px; box-shadow:0 6px 24px rgba(31,41,55,0.06);
+      padding:18px; overflow:auto;
     }
+    #loading { display:none; text-align:center; color:var(--accent); font-weight:600; margin-bottom:12px; }
 
-    #loading {
-      display:none;
-      text-align:center;
-      color:var(--accent);
-      font-weight:600;
-      margin-bottom:12px;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:700px;
-    }
+    table{ width:100%; border-collapse:collapse; min-width:800px; }
     thead th{
-      text-align:left;
-      padding:12px 14px;
-      background:linear-gradient(90deg,var(--accent),#2b7be6);
-      color:#fff;
-      font-weight:600;
-      font-size:13px;
+      text-align:left; padding:12px 14px;
+      background:linear-gradient(90deg,var(--accent),#2b7be6); color:#fff; font-weight:600; font-size:13px;
     }
-    tbody td{
-      padding:12px 14px;
-      border-bottom:1px solid #eef2f7;
-      vertical-align:middle;
-      font-size:14px;
-    }
+    tbody td{ padding:12px 14px; border-bottom:1px solid #eef2f7; vertical-align:middle; font-size:14px; }
     tbody tr:hover td{ background:var(--soft); }
 
-    .btn{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      justify-content:center;
-      border-radius:8px;
-      padding:7px 12px;
-      color:#fff;
-      border:0;
-      cursor:pointer;
-      font-weight:600;
-      font-size:13px;
+    .btn{ display:inline-flex; gap:8px; align-items:center; justify-content:center;
+      border-radius:8px; padding:7px 12px; color:#fff; border:0; cursor:pointer; font-weight:600; font-size:13px;
     }
     .btn-edit{ background:var(--accent); }
     .btn-save{ background:var(--accent-2); display:none; }
-
     .btn:disabled{ opacity:.7; cursor:not-allowed; }
 
     .spinner {
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      border:2px solid rgba(255,255,255,0.35);
-      border-top-color: #fff;
-      animation:spin .7s linear infinite;
-      display:inline-block;
-      vertical-align:middle;
+      width:14px; height:14px; border-radius:50%;
+      border:2px solid rgba(255,255,255,0.35); border-top-color:#fff; animation:spin .7s linear infinite;
+      display:inline-block; vertical-align:middle; margin-right:6px;
     }
     @keyframes spin{ to{ transform:rotate(360deg) } }
 
     /* modal notif */
-    .modal-backdrop{
-      position:fixed; inset:0; background:rgba(10,11,13,0.45);
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(10,11,13,0.45);
       display:none; align-items:center; justify-content:center; z-index:9999;
     }
-    .modal{
-      background:var(--card);
-      border-radius:10px;
-      width:420px;
-      max-width:90%;
-      padding:18px;
-      box-shadow:0 12px 40px rgba(0,0,0,0.18);
-    }
+    .modal{ background:var(--card); border-radius:10px; width:420px; max-width:90%; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,0.18); }
     .modal h3{ margin:0 0 8px; font-size:16px }
     .modal p{ margin:0 0 16px; color:var(--muted); }
     .modal .actions{ text-align:right }
-    .modal .ok-btn{
-      background:var(--accent);
-      color:#fff;
-      padding:8px 12px;
-      border-radius:8px;
-      border:0;
-      font-weight:600;
-      cursor:pointer;
-    }
+    .modal .ok-btn{ background:var(--accent); color:#fff; padding:8px 12px; border-radius:8px; border:0; font-weight:600; cursor:pointer; }
     .modal .ok-btn.err{ background:#e53e3e }
   </style>
 </head>
@@ -153,7 +75,7 @@
   <div class="container">
     <header>
       <h1>Histori Barang Keluar</h1>
-      <p>Riwayat keluar barang — edit langsung di tabel. Setelah klik Simpan, tunggu sampai notifikasi berhasil lalu klik OK untuk menyelesaikan perubahan.</p>
+      <p>Edit langsung di tabel. Setelah klik Simpan, tunggu notifikasi lalu klik OK untuk menyelesaikan.</p>
     </header>
 
     <div class="card">
@@ -167,6 +89,8 @@
             <th>Nama Barang</th>
             <th>Jumlah</th>
             <th>ID Kendaraan</th>
+            <th>Keterangan</th>
+            <th>Penanggung Jawab</th>
             <th>Aksi</th>
           </tr>
         </thead>
@@ -193,20 +117,16 @@
   function formatDateOnly(v){
     if(!v && v !== 0) return '';
     const s = String(v).trim();
-    // cari YYYY-MM-DD
     let m = s.match(/\d{4}-\d{2}-\d{2}/);
     if(m) return m[0];
-    // iso T
     if(s.includes('T')) return s.split('T')[0];
-    // token sebelum spasi
     if(s.includes(' ')) return s.split(' ')[0];
-    // dd/mm/yyyy
     m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if(m){ const d = m[1].padStart(2,'0'), mo = m[2].padStart(2,'0'), y=m[3]; return `${y}-${mo}-${d}` }
+    if(m){ const d=m[1].padStart(2,'0'), mo=m[2].padStart(2,'0'), y=m[3]; return `${y}-${mo}-${d}`; }
     return s;
   }
 
-  // modal helper -> returns Promise that resolves when user clicks OK
+  // modal helper -> Promise resolves when user clicks OK
   function showModal(title, message, isError=false){
     return new Promise(resolve=>{
       const backdrop = document.getElementById('modalBackdrop');
@@ -248,13 +168,19 @@
       tbody.innerHTML = '';
       data.forEach((row, index)=>{
         const tanggal = formatDateOnly(row.tanggal || row.Tanggal || row.tanggal_raw || '');
+        // fallback properti keterangan & penanggung
+        const keterangan = row.keterangan || row.Keterangan || row['keterangan'] || '';
+        const pj = row.penanggung_jawab || row.penanggungJawab || row['penanggung_jawab'] || row['penanggung jawab'] || '';
+        const idkend = row.id_kendaraan || row.idKendaraan || row.id_Kendaraan || row['id_kendaraan'] || '';
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td data-field="tanggal">${tanggal}</td>
           <td data-field="tujuan">${row.tujuan || ''}</td>
           <td data-field="nama">${row.nama || ''}</td>
           <td data-field="jumlah">${row.jumlah || ''}</td>
-          <td data-field="id_kendaraan">${row.id_kendaraan || row.id_kendaraan || ''}</td>
+          <td data-field="id_kendaraan">${idkend}</td>
+          <td data-field="keterangan">${keterangan}</td>
+          <td data-field="penanggung_jawab">${pj}</td>
           <td>
             <button class="btn btn-edit" data-index="${index}" onclick="enableEdit(this)">Edit</button>
             <button class="btn btn-save" data-index="${index}" onclick="saveEdit(this)">Simpan</button>
@@ -274,7 +200,7 @@
     const tr = btn.closest('tr');
     tr.querySelectorAll('td[data-field]').forEach(td=>{
       td.contentEditable = true;
-      td.style.background = '#fff8e6'; // visual cue
+      td.style.background = '#fff8e6';
     });
     btn.style.display = 'none';
     tr.querySelector('.btn-save').style.display = 'inline-flex';
@@ -283,28 +209,31 @@
   async function saveEdit(saveBtn){
     const tr = saveBtn.closest('tr');
     const editBtn = tr.querySelector('.btn-edit');
-
-    // show spinner and disable
     const origHtml = saveBtn.innerHTML;
+
+    // show spinner and disable save button
     saveBtn.innerHTML = `<span class="spinner"></span> Menyimpan...`;
     saveBtn.disabled = true;
 
-    // ambil nilai
+    // ambil nilai (tanggal dipotong jadi YYYY-MM-DD)
     const tanggalRaw = tr.querySelector("td[data-field='tanggal']").innerText.trim();
     const tanggal = formatDateOnly(tanggalRaw);
     const tujuan = tr.querySelector("td[data-field='tujuan']").innerText.trim();
     const nama = tr.querySelector("td[data-field='nama']").innerText.trim();
     const jumlah = tr.querySelector("td[data-field='jumlah']").innerText.trim();
     const id_kendaraan = tr.querySelector("td[data-field='id_kendaraan']").innerText.trim();
+    const keterangan = tr.querySelector("td[data-field='keterangan']").innerText.trim();
+    const penanggung_jawab = tr.querySelector("td[data-field='penanggung_jawab']").innerText.trim();
 
-    // kirim request
     try{
       const url = `${GAS_URL}?action=editBarangKeluar&index=${encodeURIComponent(saveBtn.dataset.index)}`
                 + `&tanggal=${encodeURIComponent(tanggal)}`
                 + `&tujuan=${encodeURIComponent(tujuan)}`
                 + `&nama=${encodeURIComponent(nama)}`
                 + `&jumlah=${encodeURIComponent(jumlah)}`
-                + `&id_kendaraan=${encodeURIComponent(id_kendaraan)}`;
+                + `&id_kendaraan=${encodeURIComponent(id_kendaraan)}`
+                + `&keterangan=${encodeURIComponent(keterangan)}`
+                + `&penanggung_jawab=${encodeURIComponent(penanggung_jawab)}`;
 
       const resp = await fetch(url);
       const text = await resp.text();
@@ -320,15 +249,14 @@
 
       tr.querySelectorAll('td[data-field]').forEach(td=>{
         td.contentEditable = false;
-        td.style.background = ''; // reset visual cue
+        td.style.background = '';
       });
 
-      // refresh tabel di background (bisa juga cuma update row, tapi reload lebih simple)
+      // refresh tabel di background
       loadHistori();
 
     }catch(err){
       console.error(err);
-      // tampil modal error dan hentikan spinner hanya setelah user klik OK
       await showModal('Gagal', err.message || 'Terjadi kesalahan', true);
       saveBtn.innerHTML = origHtml;
       saveBtn.disabled = false;
