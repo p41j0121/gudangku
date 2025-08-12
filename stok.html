@@ -145,7 +145,7 @@
   }
 
   /* Popup Registrasi */
-#registerModal {
+  #registerModal {
     display: flex;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -153,7 +153,7 @@
     justify-content: center;
     align-items: center;
     z-index: 999;
-}
+  }
   #registerModal.hidden {
     display: none !important;
   }
@@ -460,16 +460,34 @@ document.addEventListener("DOMContentLoaded", () => {
   loadKategori();
   document.getElementById("registerButton").addEventListener("click", registerUser);
   document.getElementById("cancelRegisterButton").addEventListener("click", closeRegister);
+
   document.getElementById("stokForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    
+    // Disable tombol dan ubah teks jadi loading
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Memuat...';
+
     const nama = document.getElementById("nama").value;
     const jumlah = document.getElementById("jumlah").value;
     const kategori = document.getElementById("kategori").value;
     const keterangan = document.getElementById("keterangan").value;
-    const res = await fetch(`${GAS_URL_STOK}?action=tambahStok&nama=${encodeURIComponent(nama)}&jumlah=${jumlah}&kategori=${encodeURIComponent(kategori)}&keterangan=${encodeURIComponent(keterangan)}`);
-    const result = await res.text();
-    alert(result);
-    document.getElementById("stokForm").reset();
+
+    try {
+      const res = await fetch(`${GAS_URL_STOK}?action=tambahStok&nama=${encodeURIComponent(nama)}&jumlah=${jumlah}&kategori=${encodeURIComponent(kategori)}&keterangan=${encodeURIComponent(keterangan)}`);
+      const result = await res.text();
+      alert(result);
+      e.target.reset();
+    } catch (error) {
+      alert("Terjadi kesalahan saat menambah stok");
+      console.error(error);
+    } finally {
+      // Enable tombol dan kembalikan teks asli
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
   });
 });
 </script>
