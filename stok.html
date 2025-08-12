@@ -229,8 +229,8 @@
 <!-- Cek Login -->
 <script>
   (function() {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (!isLoggedIn) {
+    const isLoggedIn = localStorage.getItem('login');
+    if (isLoggedIn !== 'true') {
       alert('⚠️ Akses ditolak... Login dulu untuk input stok');
       window.location.href = 'index.html'; // ganti ke halaman login mu
     }
@@ -518,3 +518,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
