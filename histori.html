@@ -113,7 +113,7 @@
             <td data-field="tujuan">${row.tujuan}</td>
             <td data-field="nama">${row.nama}</td>
             <td data-field="jumlah">${row.jumlah}</td>
-            <td data-field="idKendaraan">${row.id_Kendaraan}</td>
+            <td data-field="id_kendaraan">${row.id_kendaraan}</td>
             <td>
               <button class="edit-btn" onclick="enableEdit(this, ${index})">Edit</button>
               <button class="save-btn" style="display:none;" onclick="saveEdit(this, ${index})">Simpan</button>
@@ -142,10 +142,10 @@
       const tujuan = row.querySelector("td[data-field='tujuan']").innerText.trim();
       const nama = row.querySelector("td[data-field='nama']").innerText.trim();
       const jumlah = row.querySelector("td[data-field='jumlah']").innerText.trim();
-      const idKendaraan = row.querySelector("td[data-field='id_Kendaraan']").innerText.trim();
+      const id_kendaraan = row.querySelector("td[data-field='id_kendaraan']").innerText.trim();
 
       try {
-        const res = await fetch(`${GAS_URL}?action=editBarangKeluar&index=${index}&tanggal=${encodeURIComponent(tanggal)}&tujuan=${encodeURIComponent(tujuan)}&nama=${encodeURIComponent(nama)}&jumlah=${encodeURIComponent(jumlah)}&id_Kendaraan=${encodeURIComponent(id_Kendaraan)}`);
+        const res = await fetch(`${GAS_URL}?action=editBarangKeluar&index=${index}&tanggal=${encodeURIComponent(tanggal)}&tujuan=${encodeURIComponent(tujuan)}&nama=${encodeURIComponent(nama)}&jumlah=${encodeURIComponent(jumlah)}&id_kendaraan=${encodeURIComponent(id_kendaraan)}`);
         const result = await res.text();
         alert(result);
         loadHistori();
@@ -158,4 +158,5 @@
 
 </body>
 </html>
+
 
